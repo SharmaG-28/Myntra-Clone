@@ -2,11 +2,16 @@ import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth'
 import React, { useState } from 'react'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
-import { auth } from '../firebase/setup'
+import { auth, database } from '../firebase/setup'
 import Navbar from './Navbar'
+import { doc, setDoc } from 'firebase/firestore'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { Navigate, useNavigate } from 'react-router-dom'
 
 const Login = () => {
 
+    const navigate = useNavigate()
     const [phone, setPhone] = useState("")
     const [user, setUser] = useState<any>(null)
     const [otp, setOtp] = useState("")
@@ -24,18 +29,18 @@ const Login = () => {
     const verifyOtp = async() =>{
         try{
             await user.confirm(otp)
-            // const userDoc = doc(database,"users",`${auth.currentUser?.uid}`)
-            // setDoc(userDoc,{
-            //     data:auth.currentUser?.uid
-            // })
-            // auth.currentUser?.phoneNumber && toast.success("LoggedIn successfully")
-            // setTimeout(()=>{
-            //     auth.currentUser?.phoneNumber && navigate("/")
-            // },1000)
+            const userDoc = doc(database,"users",`${auth.currentUser?.uid}`)
+            setDoc(userDoc,{
+                data:auth.currentUser?.uid
+            })
+            auth.currentUser?.phoneNumber && toast.success("LoggedIn successfully")
+            setTimeout(()=>{
+                auth.currentUser?.phoneNumber && navigate("/")
+            },1000)
         }catch(err){
             console.error(err)
             let error:any = err
-            // toast.error(error)
+            toast.error(error)
         }
     }
 
@@ -43,6 +48,7 @@ const Login = () => {
 
     return (
         <>
+            <ToastContainer/>
             <Navbar/>
             <div className=' bg-rose-50 h-screen flex flex-col justify-center items-center'>
                 <div className=' h-96 w-96 bg-white flex flex-col justify-center items-center'>
